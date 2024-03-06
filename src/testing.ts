@@ -1,33 +1,48 @@
 import { objectEntries } from 'ts-extras'
 import { z, ZodNumber, ZodString } from 'zod'
 
+type ValidTypes = 'string' | 'number'
+
+type ValidTypesMap = {
+  string: string
+  number: number
+  boolean: boolean
+}
+
 function define<
   Flag extends Record<
     string,
-    | { type: ZodString; defaultValue?: string }
-    | { type: ZodNumber; defaultValue?: number }
+    | { type: 'string'; defaultValue?: string }
+    | { type: 'number'; defaultValue?: number }
   >,
 >(schema: {
   flag: Flag
   run: (runtimeValues: {
-    [Key in keyof Flag]: Flag[Key]['type'] extends ZodString ? string : number
+    [Key in keyof Flag]: Flag[Key]['type'] extends `string` ? string : number
   }) => void
 }) {
   return schema
+}
+
+function getZod(type: ValidTypes): ZodString | ZodNumber {
+  return {
+    string: z.string(),
+    number: z.number(),
+  }[type]
 }
 
 function validateValues<
   Schema extends {
     flag: Record<
       string,
-      | { type: ZodString; defaultValue?: string }
-      | { type: ZodNumber; defaultValue?: number }
+      | { type: 'string'; defaultValue?: string }
+      | { type: 'number'; defaultValue?: number }
     >
     run: (runtimeValues: RuntimeValues) => void
   },
   RuntimeValues extends {
     [Key in keyof Schema['flag']]: Schema['flag'][Key]['type'] extends (
-      ZodString
+      'string'
     ) ?
       string
     : number
@@ -38,7 +53,9 @@ function validateValues<
     if (!item) {
       throw new Error(`Unknown flag ${key}`)
     }
-    item.type.parse(value)
+    // TODO: Get zod parser from string type
+    const zod = getZod(item.type)
+    zod.parse(value)
   }
 
   return values
@@ -46,8 +63,8 @@ function validateValues<
 
 const schema = define({
   flag: {
-    helloString: { type: z.string(), defaultValue: 'a default value' },
-    helloNumber: { type: z.number(), defaultValue: 100 },
+    helloString: { type: 'string', defaultValue: 'a default value' },
+    helloNumber: { type: 'number', defaultValue: 100 },
   },
   run: (runtimeValues) => {
     runtimeValues.helloString
