@@ -9,12 +9,20 @@ type ValidTypesMap = {
   boolean: boolean
 }
 
+type SharedFlagFields = {
+  description?: string
+  alias?: string
+}
+
 function define<
   Flag extends Record<
     string,
-    | { type: 'string'; defaultValue?: string }
-    | { type: 'number'; defaultValue?: number }
-    | { type: 'boolean'; defaultValue?: boolean }
+    (
+      | { type: 'string'; defaultValue?: string }
+      | { type: 'number'; defaultValue?: number }
+      | { type: 'boolean'; defaultValue?: boolean }
+    ) &
+      SharedFlagFields
   >,
 >(schema: {
   flag: Flag
