@@ -24,12 +24,17 @@ function define<
     ) &
       SharedFlagFields
   >,
->(schema: {
-  flag: Flag
-  run: (runtimeValues: {
-    [Key in keyof Flag]: ValidTypesMap[Flag[Key]['type']]
-  }) => void
-}) {
+>(
+  schema: Record<
+    string,
+    {
+      flag: Flag
+      run: (runtimeValues: {
+        [Key in keyof Flag]: ValidTypesMap[Flag[Key]['type']]
+      }) => void
+    }
+  >,
+) {
   return schema
 }
 
@@ -42,49 +47,60 @@ function getZod(type: ValidTypes): ZodString | ZodNumber | ZodBoolean {
 }
 
 function validateValues<
-  Schema extends {
-    flag: Record<
-      string,
-      | { type: 'string'; defaultValue?: string }
-      | { type: 'number'; defaultValue?: number }
-      | { type: 'boolean'; defaultValue?: boolean }
-    >
-    run: (runtimeValues: RuntimeValues) => void
+  Schema extends Record<
+    string,
+    {
+      flag: Record<
+        string,
+        | { type: 'string'; defaultValue?: string }
+        | { type: 'number'; defaultValue?: number }
+        | { type: 'boolean'; defaultValue?: boolean }
+      >
+      run: (runtimeValues: RunArguments) => void
+    }
+  >,
+  RunArguments extends {
+    [FlagKey in keyof Schema[keyof Schema]['flag']]: ValidTypesMap[Schema[keyof Schema]['flag'][FlagKey]['type']]
   },
   RuntimeValues extends {
-    [Key in keyof Schema['flag']]: ValidTypesMap[Schema['flag'][Key]['type']]
+    [SchemaKey in keyof Schema]: {
+      [FlagKey in keyof Schema[SchemaKey]['flag']]: ValidTypesMap[Schema[SchemaKey]['flag'][FlagKey]['type']]
+    }
   },
 >(schema: Schema, values: RuntimeValues): RuntimeValues {
-  for (const [key, value] of objectEntries(values)) {
-    const item = schema.flag[key]
-    if (!item) {
-      throw new Error(`Unknown flag ${key}`)
+  for (const [commandKey, commandValue] of objectEntries(values)) {
+    for (const [flagKey, value] of objectEntries(commandValue)) {
+      // TODO: Ensure this is type-safe
+      const item = schema[commandKey]!.flag[flagKey]
+      if (!item) {
+        throw new Error(`Unknown flag ${flagKey}`)
+      }
+      const zod = getZod(item.type)
+      zod.parse(value)
     }
-    const zod = getZod(item.type)
-    zod.parse(value)
   }
 
   return values
 }
 
 const schema = define({
-  flag: {
-    helloString: { type: 'string', defaultValue: 'a default value' },
-    helloNumber: { type: 'number', defaultValue: 100 },
-    helloBoolean: { type: 'boolean', defaultValue: false },
-  },
-  run: (runtimeValues) => {
-    runtimeValues.helloString
+  hello: {
+    flag: {
+      helloString: { type: 'string', defaultValue: 'a default value' },
+      helloNumber: { type: 'number', defaultValue: 100 },
+      helloBoolean: { type: 'boolean', defaultValue: false },
+    },
+    run: (runtimeValues) => {
+      runtimeValues.helloString
+    },
   },
 })
 
 const mockRuntimeValues = {
-  helloString: 'world',
-  helloNumber: 42,
-  helloBoolean: true,
+  hello: { helloString: 'world', helloNumber: 42, helloBoolean: true },
 }
 
 const result = validateValues(schema, mockRuntimeValues)
 
-result.helloString
-result.helloNumber
+result.hello.helloString
+result.hello.helloNumber
