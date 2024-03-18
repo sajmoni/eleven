@@ -14,8 +14,7 @@ export default function getArguments(): Record<
   }
 
   const mockRuntimeValues = {
-    hello: { helloString: 42, helloNumber: 42, helloBoolean: true },
-    // world: { worldString: 'world', worldNumber: 42, worldBoolean: true },
+    hello: { helloString: '42', helloNumber: 42, helloBoolean: true },
   }
 
   return mockRuntimeValues

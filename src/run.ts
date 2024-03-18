@@ -1,7 +1,7 @@
 import { objectEntries } from 'ts-extras'
-import { ZodBoolean, ZodNumber, ZodString, string, z } from 'zod'
-import type { ValidTypes, ValidTypesMap } from './type'
-import type { Command, FlagType } from './command'
+import { ZodBoolean, ZodNumber, ZodString, z } from 'zod'
+import type { ValidTypes } from './type'
+import type { Command as CommandType, FlagType } from './command'
 import getArguments from './parse'
 
 function stringToZod(type: ValidTypes): ZodString | ZodNumber | ZodBoolean {
@@ -12,37 +12,26 @@ function stringToZod(type: ValidTypes): ZodString | ZodNumber | ZodBoolean {
   }[type]
 }
 
-export function validate<
+export function validateFlags<
   Flag extends FlagType,
-  Commands extends Command<Flag>[],
+  Command extends CommandType<Flag>,
   // TODO: Can the type be written like this and does it matter?
   // RuntimeValues extends {
   //   [Key in Commands[number]['name']]: {
   //     [FlagKey in keyof Commands[number]['flag']]: ValidTypesMap[Commands[number]['flag'][FlagKey]['type']]
   //   }
   // },
-  RuntimeValues extends Record<
-    string,
-    Record<string, string | number | boolean>
-  >,
->(commands: Commands, values: RuntimeValues): void {
-  // There will only be one entry...
-  for (const [commandKey, commandFlags] of objectEntries(values)) {
-    const command = commands.find((command) => command.name === commandKey)
-    if (!command) {
-      throw new Error('Unknown command!')
+  RuntimeValues extends Record<string, string | number | boolean>,
+>(command: Command, commandFlags: RuntimeValues): void {
+  for (const [flagKey, flagValue] of objectEntries(commandFlags)) {
+    const flag = command.flag[flagKey]
+    if (!flag) {
+      throw new Error('Unknown flag!')
       // TODO: Did you mean?
     }
-    for (const [flagKey, flagValue] of objectEntries(commandFlags)) {
-      const flag = command.flag[flagKey]
-      if (!flag) {
-        throw new Error('Unknown flag!')
-        // TODO: Did you mean?
-      }
-      const zod = stringToZod(flag.type)
-      // This zod error needs to be tweaked, its not very end user friendly
-      zod.parse(flagValue)
-    }
+    const zod = stringToZod(flag.type)
+    // TODO: This zod error needs to be tweaked, its not very end user friendly
+    zod.parse(flagValue)
   }
 }
 
@@ -64,11 +53,19 @@ export default function run<
 >(commands: Commands) {
   const args = getArguments()
 
+  const [commandKey, commandFlags] = Object.entries(args)[0]!
+
+  const command = commands.find((command) => command.name === commandKey)
+
+  if (!command) {
+    throw new Error('Unknown command!')
+    // TODO: Did you mean?
+  }
+
   // Get the command to run here
 
-  // TODO: This should only validate command flags
   // Throws error on failure, maybe revise?
-  validate(commands, args)
+  validateFlags(command, commandFlags)
 
   // TODO: Call the run function here
 
