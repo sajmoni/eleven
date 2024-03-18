@@ -1,8 +1,11 @@
 import { objectEntries } from 'ts-extras'
 import { ZodBoolean, ZodNumber, ZodString, z } from 'zod'
+import chalk from 'chalk'
+
 import type { ValidTypes } from './type'
 import type { Command as CommandType, FlagType } from './command'
 import getArguments from './parse'
+import didYouMean from './didYouMean'
 
 function stringToZod(type: ValidTypes): ZodString | ZodNumber | ZodBoolean {
   return {
@@ -22,17 +25,29 @@ export function validateFlags<
   //   }
   // },
   RuntimeValues extends Record<string, string | number | boolean>,
->(command: Command, commandFlags: RuntimeValues): void {
+>(command: Command, commandFlags: RuntimeValues): boolean {
+  const allFlagNames = Object.keys(command.flag)
+
   for (const [flagKey, flagValue] of objectEntries(commandFlags)) {
     const flag = command.flag[flagKey]
     if (!flag) {
-      throw new Error('Unknown flag!')
-      // TODO: Did you mean?
+      console.log(`\nFlag "${flagKey}" not found`)
+      didYouMean(flagKey, allFlagNames)
+      return false
     }
     const zod = stringToZod(flag.type)
-    // TODO: This zod error needs to be tweaked, its not very end user friendly
-    zod.parse(flagValue)
+    const parseResult = zod.safeParse(flagValue)
+    if (parseResult.success === false) {
+      const error = parseResult.error.issues[0]!
+      console.log(
+        //TODO: Figure out the types here
+        `\nFlag ${chalk.bold(flagKey)}: expected type ${chalk.bold(error.expected)} but got type ${chalk.bold(error.received)}`,
+      )
+      return false
+    }
   }
+
+  return true
 }
 
 export type RunCommand<Flag extends FlagType> = {
@@ -58,14 +73,15 @@ export default function run<
   const command = commands.find((command) => command.name === commandKey)
 
   if (!command) {
-    throw new Error('Unknown command!')
-    // TODO: Did you mean?
+    const allNames = commands.map((command) => command.name)
+    console.log(`\nCommand "${commandKey}" not found`)
+    didYouMean(commandKey, allNames)
+    return
   }
 
-  // Get the command to run here
-
-  // Throws error on failure, maybe revise?
-  validateFlags(command, commandFlags)
+  if (!validateFlags(command, commandFlags)) {
+    return
+  }
 
   command.run(commandFlags)
 }
