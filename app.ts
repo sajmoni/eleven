@@ -10,7 +10,7 @@ const commands = [
       helloBoolean: { type: 'boolean', defaultValue: false },
     },
     run: (runtimeValues) => {
-      runtimeValues.helloString
+      console.log('running the command hello:', runtimeValues.helloString)
     },
   }),
   command({

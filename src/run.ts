@@ -67,7 +67,5 @@ export default function run<
   // Throws error on failure, maybe revise?
   validateFlags(command, commandFlags)
 
-  // TODO: Call the run function here
-
-  console.log('running cli!')
+  command.run(commandFlags)
 }
