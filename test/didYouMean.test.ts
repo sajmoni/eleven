@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest'
-import didYouMean from './src/didYouMean.js'
+import didYouMean from '../src/didYouMean.js'
 import chalk from 'chalk'
 
 test('did-you-mean', () => {

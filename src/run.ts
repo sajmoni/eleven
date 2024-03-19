@@ -1,6 +1,7 @@
 import { objectEntries } from 'ts-extras'
 import { ZodBoolean, ZodNumber, ZodString, z } from 'zod'
 import chalk from 'chalk'
+import process from 'node:process'
 
 import type { ValidTypes } from './type'
 import type { Command as CommandType, FlagType } from './command'
@@ -66,7 +67,7 @@ export default function run<
   Flag extends FlagType,
   Commands extends RunCommand<Flag>[],
 >(commands: Commands) {
-  const args = getArguments()
+  const args = getArguments(process.argv)
 
   const [commandKey, commandFlags] = Object.entries(args)[0]!
 

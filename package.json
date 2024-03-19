@@ -1,7 +1,7 @@
 {
   "name": "eleven",
   "version": "0.0.0",
-  "description": "nandemo",
+  "description": "Effortlessly build command line apps, with compile and run time type-safety by default",
   "keywords": [],
   "license": "MIT",
   "author": "",
