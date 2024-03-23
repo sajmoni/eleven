@@ -1,49 +1,110 @@
-# eleven
+# 11-cli
 
 > Effortlessly build command line apps, with compile and run time type-safety by default
 
 ## :sparkles: Features
 
-### Minimal and simple API
-
-Only top level commands are allowed
-
-### Aliases
-
-### Auto-generated help and version
-
-### No "string" APIs
-
 ### Fully typed arguments in runtime and dev
 
-No other CLI framework does this yet
+### Minimal and simple API
 
-### Auto-complete (maybe)
+- No sub-commands
+
+### Auto-generated help and version (todo)
+
+### Supported types for flags
+
+- string
+- number
+- boolean
+- enum (todo)
+
+### Auto-complete (todo)
 
 ### Automatic runtime type validation and error messages
 
-### Automatic help and version generation
+### Automatic help and version generation by default (todo)
 
-On by default
+### Navigate help section interactively (todo) (optional)
 
-### Optional interactiveness built-in
-
-Use ink for this to navigate help section interactively
-
-### Message when CLI version is outdated
+### Message when CLI version is outdated (todo) (optional)
 
 Use: https://github.com/sindresorhus/latest-version
 
-This should run in a separate thread to now slow down main functionality, and should be opt-in
+Runs in a separate thread to now slow down main functionality
 
 ### Hints when command is misspelled
 
-Inspiration: https://github.com/npm/cli/blob/latest/lib/utils/did-you-mean.js
-
-### Watch mode
+### Watch mode (todo)
 
 See how changes to your CLI immediately updates the help section
 
-### Color output
+### Color output (todo)
 
-Needs to be able to be turned off (respect environment variables?)
+Can be turned off with flag or environment variable
+
+## Example usage
+
+```ts
+import { command, run } from '11-cli'
+
+const commands = [
+  command({
+    name: 'hello',
+    flag: {
+      world: { type: 'string' },
+    },
+    run({ world }) {
+      console.log(world)
+    },
+  }),
+]
+
+run(commands)
+```
+
+## API
+
+### command
+
+#### name
+
+string
+
+#### run
+
+(runtimeValues) => void
+
+#### flag
+
+Record<string, Flag>
+
+```ts
+flag: {
+  hello: {
+    type: 'string'
+  }
+}
+```
+
+##### type
+
+'string' | 'number' | 'boolean'
+
+##### defaultValue?
+
+string | number | boolean
+
+##### description?
+
+string
+
+##### alias?
+
+string
+
+## Install
+
+```console
+npm install 11-cli
+```
