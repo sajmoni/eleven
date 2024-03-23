@@ -46,7 +46,7 @@ Can be turned off with flag or environment variable
 ## Example usage
 
 ```ts
-import { command, run } from '11-cli'
+import { command, run } from 'cli-eleven'
 
 const commands = [
   command({
