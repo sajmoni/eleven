@@ -42,6 +42,7 @@ export function validateFlags<
       const error = parseResult.error.issues[0]!
       console.log(
         //TODO: Figure out the types here
+        // @ts-expect-error - This actually works although typescript complains
         `\nFlag ${chalk.bold(flagKey)}: expected type ${chalk.bold(error.expected)} but got type ${chalk.bold(error.received)}`,
       )
       return false
