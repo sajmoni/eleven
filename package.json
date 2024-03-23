@@ -1,6 +1,6 @@
 {
   "name": "11-cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Effortlessly build command line apps, with compile and run time type-safety by default",
   "keywords": [],
   "license": "MIT",
