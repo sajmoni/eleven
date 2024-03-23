@@ -1,4 +1,4 @@
-# 11-cli
+# eleven
 
 > Effortlessly build command line apps, with compile and run time type-safety by default
 
@@ -106,5 +106,5 @@ string
 ## Install
 
 ```console
-npm install 11-cli
+npm install cli-eleven
 ```
