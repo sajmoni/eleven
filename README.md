@@ -10,8 +10,6 @@
 
 - No sub-commands
 
-### Auto-generated help and version (todo)
-
 ### Supported types for flags
 
 - string
